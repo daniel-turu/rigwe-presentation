@@ -9,8 +9,10 @@ import {
   Menu,
   X,
   LayoutGrid,
-  Sparkles
+  Sparkles,
+  Radio
 } from 'lucide-react'
+import mqtt from 'mqtt'
 
 // Import Slide Components
 import Slide1Cover from './components/Slide1Cover'
@@ -39,6 +41,54 @@ function App() {
   const autoplayTimerRef = useRef(null)
 
   const slidesCount = 11
+
+  // MQTT Real-time Sync State
+  const [syncClient, setSyncClient] = useState(null)
+  const isPresenterRef = useRef(false)
+  const [isPresenterUI, setIsPresenterUI] = useState(false)
+
+  // Initialize MQTT Connection
+  useEffect(() => {
+    const TOPIC = 'techboost/rigwe-slide-sync-v1'
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt')
+    
+    client.on('connect', () => {
+      client.subscribe(TOPIC)
+    })
+    
+    client.on('message', (topic, message) => {
+      if (!isPresenterRef.current) {
+        const newSlide = parseInt(message.toString())
+        if (!isNaN(newSlide)) {
+          setCurrentSlide(prev => {
+            if (newSlide !== prev) setDirection(newSlide > prev ? 'next' : 'prev')
+            return newSlide
+          })
+        }
+      }
+    })
+
+    setSyncClient(client)
+    return () => client.end()
+  }, [])
+
+  // Broadcast slide changes if presenter
+  useEffect(() => {
+    if (isPresenterRef.current && syncClient) {
+      const TOPIC = 'techboost/rigwe-slide-sync-v1'
+      syncClient.publish(TOPIC, currentSlide.toString(), { retain: true })
+    }
+  }, [currentSlide, syncClient])
+
+  const togglePresenter = () => {
+    isPresenterRef.current = !isPresenterRef.current
+    setIsPresenterUI(isPresenterRef.current)
+    
+    // If just turned on, instantly broadcast current slide to sync anyone waiting
+    if (isPresenterRef.current && syncClient) {
+      syncClient.publish('techboost/rigwe-slide-sync-v1', currentSlide.toString(), { retain: true })
+    }
+  }
 
   // Keyboard navigation
   useEffect(() => {
@@ -618,6 +668,16 @@ function App() {
 
         {/* Play/Autoplay controls and help triggers */}
         <div className="flex flex-wrap items-center gap-3 text-xs w-full md:w-auto justify-between md:justify-end">
+
+          {/* Broadcast / Sync Mode Toggler */}
+          <button
+            onClick={togglePresenter}
+            className={`p-2 rounded-xl transition-all flex items-center gap-2 border font-bold ${isPresenterUI ? 'bg-red-500/10 text-red-400 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'bg-black/10 text-slate-400 border-white/5 hover:text-white'}`}
+            title="Lock & Broadcast slide changes to all connected devices"
+          >
+            <Radio size={14} className={isPresenterUI ? 'animate-pulse' : ''} />
+            <span>{isPresenterUI ? 'BROADCASTING' : 'Host Broadcast'}</span>
+          </button>
 
           {/* Autoplay togglers */}
           <div className="flex items-center gap-2 bg-black/10 border border-white/5 rounded-xl p-1">
