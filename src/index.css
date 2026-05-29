@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  
+  /* Rich African-inspired & Brand Palette based on provided images */
+  --color-irigwe-green: #008751;
+  --color-irigwe-lightgreen: #0b9444;
+  --color-irigwe-lime: #84cc16;
+  --color-irigwe-darkgreen: #014d31;
+  --color-irigwe-navy: #0a1128;
+  --color-irigwe-slate: #1e293b;
+  --color-irigwe-indigo: #1e3a8a;
+  
+  /* Accents from traditional clothing beads */
+  --color-irigwe-red: #dc2626;
+  --color-irigwe-orange: #f97316;
+  --color-irigwe-yellow: #facc15;
+  --color-irigwe-cream: #fdfbf7;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--color-irigwe-cream);
+  color: var(--color-irigwe-navy);
+  overflow-x: hidden;
+}
+
+/* Custom smooth transition classes */
+@keyframes slideInNext {
+  0% { opacity: 0; transform: scale(0.98) translateX(60px); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
+}
+@keyframes slideInPrev {
+  0% { opacity: 0; transform: scale(0.98) translateX(-60px); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
+}
+.animate-slide-next {
+  animation: slideInNext 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-slide-prev {
+  animation: slideInPrev 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-panel-dark {
+  background: rgba(10, 17, 40, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Keyframes for subtle background movements */
+@keyframes slow-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-slow-pan {
+  background-size: 200% 200%;
+  animation: slow-pan 20s ease infinite;
+}
+
+/* Micro-animations */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
